@@ -1,8 +1,10 @@
+import dayjs from "dayjs";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import logo from "../../../assets/image/logo.png";
 import { Status } from "../../../common/type";
 import { Kir } from "../../../feature/kir/kir";
+import { LiveDateTime } from "../../component/LiveDateTime";
 import { Spinner } from "../../component/Spinner";
 import {
   KirCard,
@@ -21,16 +23,21 @@ export function FindKir() {
     if (kirApi.state.status == Status.idle && kirApi.state.data == undefined) {
       kirApi.find(certificateNumber!);
     }
+
+    console.log(kirApi.state);
   }, [kirApi.state]);
 
   return (
     <>
       <div className="min-h-screen flex flex-col pb-6 bg-gray-100">
-        <div className="bg-blue-900 p-4 flex items-center justify-center gap-2">
-          <img src={logo} className="w-8" />
-          <div className="text-white font-semibold text-lg">
-            KEMENTERIAN PERHUBUNGAN
+        <div className="bg-blue-900 p-4 flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <img src={logo} className="w-8" />
+            <div className="text-white font-semibold text-lg">
+              KEMENTERIAN PERHUBUNGAN
+            </div>
           </div>
+          <LiveDateTime className="bg-white text-gray-700 w-40 text-center font-semibold py-1 text-xs rounded-full" />
         </div>
 
         {(() => {
@@ -47,12 +54,14 @@ export function FindKir() {
                   <div>
                     <div className="p-6 text-center text-2xl space-y-2 text-gray-600">
                       <div>UJI BERKALA KENDARAAN BERMOTOR</div>
-                      <div className="text-green-400 font-semibold">
+                      <div className="text-green-500 font-semibold">
                         Hasil Uji Masih Berlaku
                       </div>
                       <div>
                         Masa Berlaku Hasil Uji:{" "}
-                        {data.expiryDate?.toDateString()}
+                        {dayjs(data.expiryDate)
+                          .locale("id")
+                          .format("DD MMMM YYYY")}
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -256,7 +265,9 @@ export function FindKir() {
                             />
                             <KirCardItem
                               title="Masa berlaku uji berkala"
-                              value={data.expiryDate?.toLocaleDateString()}
+                              value={dayjs(data.expiryDate)
+                                .locale("id")
+                                .format("DD MMMM YYYY")}
                             />
                             <KirCardItem
                               title="Nama Petugas Penguji"
@@ -306,7 +317,35 @@ export function FindKir() {
             kirApi.state.status == Status.complete &&
             kirApi.state.error != undefined
           ) {
-            return <>Error</>;
+            return (
+              <div className="grow flex flex-col gap-4 items-center justify-center">
+                <div className="text-red-500 w-[80%] text-center">
+                  {kirApi.state.error.message}
+                </div>
+                <button
+                  className="bg-blue-500 text-white hover:bg-blue-600 focus:bg-blue-600 px-2 py-1 rounded flex items-center gap-1"
+                  onClick={() => {
+                    kirApi.find(certificateNumber!);
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                    />
+                  </svg>
+                  <div>Coba Lagi</div>
+                </button>
+              </div>
+            );
           }
 
           return (
