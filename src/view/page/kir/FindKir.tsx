@@ -14,6 +14,7 @@ import {
   KirSection,
 } from "./KirComponent";
 import { useKirApi } from "./KirHook";
+import { server } from "../../../common/config";
 
 export function FindKir() {
   const kirApi = useKirApi();
@@ -54,9 +55,25 @@ export function FindKir() {
                   <div>
                     <div className="p-6 text-center text-2xl space-y-2 text-gray-600">
                       <div>UJI BERKALA KENDARAAN BERMOTOR</div>
-                      <div className="text-green-500 font-semibold">
-                        Hasil Uji Masih Berlaku
-                      </div>
+                      {(() => {
+                        const today = dayjs();
+                        const expiryDate = dayjs(data.expiryDate);
+                        const isValid = today.isBefore(expiryDate);
+
+                        if (isValid) {
+                          return (
+                            <div className="text-green-500 font-semibold">
+                              Hasil Uji Masih Berlaku
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div className="text-red-500 font-semibold">
+                              Hasil Uji Tidak Berlaku
+                            </div>
+                          );
+                        }
+                      })()}
                       <div>
                         Masa Berlaku Hasil Uji:{" "}
                         {dayjs(data.expiryDate)
@@ -113,19 +130,19 @@ export function FindKir() {
                         <div className="flex flex-col gap-2 justify-between lg:gap-6 lg:flex-row">
                           <KirCardImage
                             title="TAMPAK DEPAN"
-                            value={data.frontPic}
+                            value={`${server}/${data.frontPic}`}
                           />
                           <KirCardImage
                             title="TAMPAK BELAKANG"
-                            value={data.backPic}
+                            value={`${server}/${data.backPic}`}
                           />
                           <KirCardImage
                             title="TAMPAK KIRI"
-                            value={data.leftPic}
+                            value={`${server}/${data.leftPic}`}
                           />
                           <KirCardImage
                             title="TAMPAK KANAN"
-                            value={data.rightPic}
+                            value={`${server}/${data.rightPic}`}
                           />
                         </div>
                       </div>
@@ -202,7 +219,7 @@ export function FindKir() {
                             title="Kelas jalan terendah yang boleh dilalui"
                             value={data.classPermit}
                           />
-                          <KirCardItem title="MST" value={data.cardNumber} />
+                          <KirCardItem title="MST" value={data.mst} />
                         </KirCard>
                         <div className="flex flex-col w-full space-y-2">
                           <KirCard title="RINCIAN HASIL UJI">
@@ -247,15 +264,15 @@ export function FindKir() {
                             <KirCardItemHeading title="Hasil Uji Emisi" />
                             <KirCardItem
                               title="Emisi CO"
-                              value={data.cardNumber}
+                              value={data.coEmision}
                             />
                             <KirCardItem
                               title="Emisi HC"
-                              value={data.cardNumber}
+                              value={data.hcEmision}
                             />
                             <KirCardItem
                               title="Ketebalan Asap"
-                              value={data.cardNumber}
+                              value={data.smokeDensity}
                             />
                           </KirCard>
                           <KirCard title="KETERANGAN HASIL UJI">
@@ -279,28 +296,25 @@ export function FindKir() {
                             />
                             <KirCardItem
                               title="Nama Kepala Dinas"
-                              value={data.cardNumber}
+                              value={data.director}
                             />
                             <KirCardItem
                               title="Pangkat Kepala Dinas"
-                              value={data.cardNumber}
+                              value={data.directorLevel}
                             />
                             <KirCardItem
                               title="NIP Kepala Dinas"
-                              value={data.cardNumber}
+                              value={data.directorNumber}
                             />
                             <KirCardItem
                               title="Unit Pelaksana Teknis Daerah Pengujian"
                               value={data.agency}
                             />
                             <KirCardItemHeading title="Asal Kendaraan Wajib Uji" />
-                            <KirCardItem
-                              title="Wilayah"
-                              value={data.cardNumber}
-                            />
+                            <KirCardItem title="Wilayah" value={data.region} />
                             <KirCardItem
                               title="Wilayah Asal"
-                              value={data.cardNumber}
+                              value={data.origin}
                             />
                           </KirCard>
                         </div>
@@ -344,6 +358,18 @@ export function FindKir() {
                   </svg>
                   <div>Coba Lagi</div>
                 </button>
+              </div>
+            );
+          }
+
+          if (
+            kirApi.state.action == "find" &&
+            kirApi.state.status == Status.complete &&
+            kirApi.state.data == undefined
+          ) {
+            return (
+              <div className="grow flex flex-col gap-4 items-center justify-center">
+                <div className="xl:text-lg">Data tidak ditemukan</div>
               </div>
             );
           }

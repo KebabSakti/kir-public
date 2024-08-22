@@ -1,4 +1,4 @@
 import { KirApi } from "./kir/kir_api";
-import { KirMock } from "./kir/kir_mock";
+import { KirRemote } from "./kir/kir_remote";
 
-export const kirApi: KirApi = new KirMock(10);
+export const kirApi: KirApi = new KirRemote();
